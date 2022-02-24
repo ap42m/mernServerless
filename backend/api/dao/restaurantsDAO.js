@@ -28,9 +28,29 @@ export default class RestaurantsDAO {
                 query = {"address.zipcode": { $eq: filters["zipcode"] } }
             } 
         }
+        let cursor
+
+        try {
+            cursor = await restaurants
+            .find(query)
+        } catch (e) {
+            console.error(`unable to issue find command, ${e}`)
+            return { restaurantsList: [], totalNumRestaurants: 0}
+        }
+
+        const displayCursor = cursor.limit(restaurantsPerPage).skip(restaurantsPerPage * page)
+
+        try {
+            const restaurantsList = await displayCursor.toArray()
+            const totalNumRestaurants =  await restaurants.countDocuments(query)
+
+            return {restaurantsList, totalNumRestaurants}
+        } catch (e) {
+            console.error(
+                `unable to convert cursor array or problem counting documents, ${e}`,
+            )
+            return {restaurantsList: [], totalNumRestaurants: 0 }
+        }
     }
-
-    //let cursor Timestamp in video 31:09 continue from there youre getting there bro atleasst youre coding again, databases are weird but cool  in praise of ERRISS, THE PLEMORA, AND ABRAXAS AMEN.
-
 }
        
